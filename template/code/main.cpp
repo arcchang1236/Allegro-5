@@ -1,10 +1,11 @@
 #include <stdio.h>
-#include <iostream>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 
 #define GAME_TERMINATE 3
 
@@ -20,6 +21,7 @@ ALLEGRO_KEYBOARD_STATE keyState ;
 ALLEGRO_TIMER *timer = NULL;
 ALLEGRO_TIMER *timer2 = NULL;
 ALLEGRO_SAMPLE *song=NULL;
+ALLEGRO_FONT *font = NULL;
 
 bool transfer ;
 
@@ -41,7 +43,7 @@ int imageHeight = 0;
 int draw = 0 ;
 int done = 0 ;
 int window = 1;
-int judge_next_window = false;
+bool judge_next_window = false;
 
 void show_err_msg(int msg);
 void game_init();
@@ -118,6 +120,9 @@ void game_init() {
     al_install_audio();
     al_init_image_addon();
     al_init_acodec_addon();
+    al_init_font_addon(); // initialize the font addon
+    al_init_ttf_addon(); // initialize the ttf (True Type Font) addon
+
 
     image = al_load_bitmap("teemo.png");
     image2 = al_load_bitmap("maokai.png");
@@ -125,6 +130,7 @@ void game_init() {
 
     background = al_load_bitmap("stage.jpg");
 
+    font = al_load_ttf_font("pirulen.ttf",12,0); // load font
 
     al_register_event_source(event_queue, al_get_display_event_source(display));
     al_register_event_source(event_queue, al_get_keyboard_event_source());
@@ -135,7 +141,9 @@ void game_init() {
 void game_begin() {
     //Loop the song until the display closes
     al_play_sample(song, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP,NULL);
-    al_clear_to_color(al_map_rgb(255, 255, 255));
+    al_clear_to_color(al_map_rgb(100,100,100));
+    al_draw_text(font, al_map_rgb(255,255,255), 400, 520 , ALLEGRO_ALIGN_CENTRE, "Press 'Enter' to start");
+    al_draw_rectangle(200, 510, 600, 550, al_map_rgb(255, 255, 255), 0);
     al_flip_display();
 
 }
