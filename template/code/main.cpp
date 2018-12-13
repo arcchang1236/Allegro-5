@@ -19,13 +19,14 @@ ALLEGRO_BITMAP *background = NULL;
 ALLEGRO_KEYBOARD_STATE keyState ;
 ALLEGRO_TIMER *timer = NULL;
 ALLEGRO_TIMER *timer2 = NULL;
+ALLEGRO_TIMER *timer3 = NULL;
 ALLEGRO_SAMPLE *song=NULL;
 ALLEGRO_FONT *font = NULL;
 
 //Custom Definition
 const char *title = "Final Project 10xxxxxxx";
 const float FPS = 60;
-const int WIDTH = 800;
+const int WIDTH = 400;
 const int HEIGHT = 600;
 typedef struct character
 {
@@ -45,7 +46,9 @@ int draw = 0;
 int done = 0;
 int window = 1;
 bool judge_next_window = false;
-bool ture_1 , ture_2;
+bool ture = true; //true: appear, false: disappear
+bool next = false; //true: trigger
+bool dir = true; //true: left, false: right
 
 void show_err_msg(int msg);
 void game_init();
@@ -127,7 +130,7 @@ void game_begin() {
     // Load and draw text
     font = al_load_ttf_font("pirulen.ttf",12,0);
     al_draw_text(font, al_map_rgb(255,255,255), WIDTH/2, HEIGHT/2+220 , ALLEGRO_ALIGN_CENTRE, "Press 'Enter' to start");
-    al_draw_rectangle(200, 510, 600, 550, al_map_rgb(255, 255, 255), 0);
+    al_draw_rectangle(WIDTH/2-150, 510, WIDTH/2+150, 550, al_map_rgb(255, 255, 255), 0);
     al_flip_display();
 }
 
@@ -138,10 +141,19 @@ int process_event(){
 
     // Our setting for controlling animation
     if(event.timer.source == timer){
-        ture_1 = !ture_1 ;
+        if(character2.x < -150) dir = false;
+        else if(character2.x > WIDTH+50) dir = true;
+
+        if(dir) character2.x -= 10;
+        else character2.x += 10;
     }
     if(event.timer.source == timer2){
-        ture_2 = !ture_2 ;
+        ture = false;
+        next = true;
+    }
+    if(event.timer.source == timer3){
+        if(next) next = false;
+        else ture = true;
     }
 
     // Keyboard
@@ -149,7 +161,7 @@ int process_event(){
     {
         switch(event.keyboard.keycode)
         {
-            // P1 control
+            // Control
             case ALLEGRO_KEY_W:
                 character1.y -= 30;
                 break;
@@ -161,20 +173,6 @@ int process_event(){
                 break;
             case ALLEGRO_KEY_D:
                 character1.x += 30;
-                break;
-
-            // P2 control
-            case ALLEGRO_KEY_UP:
-                character2.y -= 30;
-                break;
-            case ALLEGRO_KEY_DOWN:
-                character2.y += 30;
-                break;
-            case ALLEGRO_KEY_RIGHT:
-                character2.x += 30;
-                break;
-            case ALLEGRO_KEY_LEFT:
-                character2.x -= 30;
                 break;
 
             // For Start Menu
@@ -200,22 +198,25 @@ int game_run() {
             if(judge_next_window) {
                 window = 2;
                 // Setting Character
-                character1.x = WIDTH / 2 - 300;
-                character1.y = HEIGHT / 2 + 75;
-                character2.x = WIDTH / 2 + 170;
-                character2.y = HEIGHT / 2 + 100;
-                character1.image_path = al_load_bitmap("maokai.png");
-                character2.image_path= al_load_bitmap("teemo.png");
-                character3.image_path = al_load_bitmap("Azir.png");
+                character1.x = WIDTH / 2;
+                character1.y = HEIGHT / 2 + 150;
+                character2.x = WIDTH + 100;
+                character2.y = HEIGHT / 2 - 280;
+                character1.image_path = al_load_bitmap("tower.png");
+                character2.image_path = al_load_bitmap("teemo_left.png");
+                character3.image_path = al_load_bitmap("teemo_right.png");
                 background = al_load_bitmap("stage.jpg");
 
                 //Initialize Timer
-                timer  = al_create_timer(1.0);
-                timer2  = al_create_timer(1.0/3.0);
+                timer  = al_create_timer(1.0/15.0);
+                timer2  = al_create_timer(1.0);
+                timer3  = al_create_timer(1.0/10.0);
                 al_register_event_source(event_queue, al_get_timer_event_source(timer)) ;
                 al_register_event_source(event_queue, al_get_timer_event_source(timer2)) ;
+                al_register_event_source(event_queue, al_get_timer_event_source(timer3)) ;
                 al_start_timer(timer);
                 al_start_timer(timer2);
+                al_start_timer(timer3);
             }
         }
     }
@@ -223,9 +224,11 @@ int game_run() {
     else if(window == 2){
         // Change Image for animation
         al_draw_bitmap(background, 0,0, 0);
-        if(ture_1)al_draw_bitmap(character1.image_path, character1.x, character1.y, 0);
-        if(ture_2)al_draw_bitmap(character2.image_path, character2.x, character2.y, 0);
+        if(ture) al_draw_bitmap(character1.image_path, character1.x, character1.y, 0);
+
+        if(dir) al_draw_bitmap(character2.image_path, character2.x, character2.y, 0);
         else al_draw_bitmap(character3.image_path, character2.x, character2.y, 0);
+
         al_flip_display();
         al_clear_to_color(al_map_rgb(0,0,0));
 
