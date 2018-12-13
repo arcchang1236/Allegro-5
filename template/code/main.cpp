@@ -85,21 +85,21 @@ void game_init() {
     }
     if(!al_install_audio()){
         fprintf(stderr, "failed to initialize audio!\n");
-        show_err_msg(-1);
+        show_err_msg(-2);
     }
     if(!al_init_acodec_addon()){
         fprintf(stderr, "failed to initialize audio codecs!\n");
-        show_err_msg(-1);
+        show_err_msg(-3);
     }
     if (!al_reserve_samples(1)){
         fprintf(stderr, "failed to reserve samples!\n");
-        show_err_msg(-1);
+        show_err_msg(-4);
     }
     // Create display
     display = al_create_display(WIDTH, HEIGHT);
     event_queue = al_create_event_queue();
     if (display == NULL || event_queue == NULL) {
-        show_err_msg(-1);
+        show_err_msg(-5);
     }
     // Initialize Allegro settings
     al_set_window_position(display, 0, 0);
@@ -122,7 +122,7 @@ void game_begin() {
     song = al_load_sample( "hello.wav" );
     if (!song){
         printf( "Audio clip sample not loaded!\n" );
-        show_err_msg(-1);
+        show_err_msg(-6);
     }
     // Loop the song until the display closes
     al_play_sample(song, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP,NULL);
